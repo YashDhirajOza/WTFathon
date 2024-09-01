@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>ProcrastiCode IDE</title>
     <style>
       body, html {
         margin: 0;
@@ -17,23 +17,51 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        z-index: -1; /* Ensure it stays in the background */
+        z-index: -1;
       }
 
       body {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
         padding: 20px 10px;
         background: rgb(0, 0, 0);
+        color: white;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        width: 90%;
+        max-width: 1200px;
+        height: 80vh;
+        gap: 20px;
+      }
+
+      .code-area, .output-area {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
       }
 
       textarea {
-        width: 100%;
+        flex-grow: 1;
         padding: 8px;
-        z-index: 1; /* Ensure textarea is above the background */
+        z-index: 1;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #24243e;
+        border: none;
+        border-radius: 10px; /* Slightly increased border radius for a softer look */
+        font-size: 20px;
+        backdrop-filter: blur(10px); /* Apply blur effect */
+      }
+
+      textarea[disabled] {
+        background-color: rgba(180, 184, 167, 0.3); /* Slightly lighter background for disabled state */
+        color: white;
       }
 
       button {
@@ -43,23 +71,30 @@
         cursor: pointer;
         font-weight: 500;
         font-size: 17px;
-        padding: 0.8em 1.3em 0.8em 0.9em;
-        color: white;
-        background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+        padding: 0.8em 1.3em;
+        color: #fff;
+        background: linear-gradient(to right, #ffcc00, #ff5722, #3f51b5); /* Gradient matching Vanta colors */
         border: none;
         letter-spacing: 0.05em;
         border-radius: 16px;
-        z-index: 1; /* Ensure button is above the background */
+        z-index: 1;
+        margin-top: 10px;
+        transition: background 0.3s ease, transform 0.3s ease; /* Added transition for smooth effects */
       }
 
       button svg {
-        margin-right: 3px;
+        margin-right: 8px;
         transform: rotate(30deg);
         transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
       }
 
       button span {
         transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+      }
+
+      button:hover {
+        background: linear-gradient(to right, #ffeb3b, #ff5722, #303f9f); /* Darker gradient on hover */
+        transform: translateY(-3px); /* Slight lift effect on hover */
       }
 
       button:hover svg {
@@ -69,57 +104,83 @@
       button:hover span {
         transform: translateX(7px);
       }
-
-      textarea[disabled] {
-        background-color: rgb(180, 184, 167);
-        color: white;
-      }
     </style>
-  </head>
-  <body>
-    <!-- Background container for Vanta.js effect -->
+</head>
+<body>
     <div id="vanta-bg"></div>
 
-    <!-- Your main content -->
-    <textarea rows="24" placeholder="Input">
-WRITE YOUR CODE HERE
-    </textarea>
+    <div class="container">
+      <div class="code-area">
+        <textarea id="input" rows="24" placeholder="WRITE YOUR CODE HERE"></textarea>
+        <button id="run-button">
+          <svg
+            height="24"
+            width="24"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M0 0h24v24H0z" fill="none"></path>
+            <path
+              d="M5 13c0-5.088 2.903-9.436 7-11.182C16.097 3.564 19 7.912 19 13c0 .823-.076 1.626-.22 2.403l1.94 1.832a.5.5 0 0 1 .095.603l-2.495 4.575a.5.5 0 0 1-.793.114l-2.234-2.234a1 1 0 0 0-.707-.293H9.414a1 1 0 0 0-.707.293l-2.234 2.234a.5.5 0 0 1-.793-.114l-2.495-4.575a.5.5 0 0 1 .095-.603l1.94-1.832C5.077 14.626 5 13.823 5 13zm1.476 6.696l.817-.817A3 3 0 0 1 9.414 18h5.172a3 3 0 0 1 2.121.879l.817.817.982-1.8-1.1-1.04a2 2 0 0 1-.593-1.82c.124-.664.187-1.345.187-2.036 0-3.87-1.995-7.3-5-8.96C8.995 5.7 7 9.13 7 13c0 .691.063 1.372.187 2.037a2 2 0 0 1-.593 1.82l-1.1 1.039.982 1.8zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
+              fill="currentColor"
+            ></path>
+          </svg>
+          <span>Run</span>
+        </button>
+      </div>
+      <div class="output-area">
+        <textarea
+          disabled
+          rows="24"
+          id="output"
+          placeholder="Output"
+        ></textarea>
+      </div>
+    </div>
 
-    <button>
-      <svg
-        height="24"
-        width="24"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M0 0h24v24H0z" fill="none"></path>
-        <path
-          d="M5 13c0-5.088 2.903-9.436 7-11.182C16.097 3.564 19 7.912 19 13c0 .823-.076 1.626-.22 2.403l1.94 1.832a.5.5 0 0 1 .095.603l-2.495 4.575a.5.5 0 0 1-.793.114l-2.234-2.234a1 1 0 0 0-.707-.293H9.414a1 1 0 0 0-.707.293l-2.234 2.234a.5.5 0 0 1-.793-.114l-2.495-4.575a.5.5 0 0 1 .095-.603l1.94-1.832C5.077 14.626 5 13.823 5 13zm1.476 6.696l.817-.817A3 3 0 0 1 9.414 18h5.172a3 3 0 0 1 2.121.879l.817.817.982-1.8-1.1-1.04a2 2 0 0 1-.593-1.82c.124-.664.187-1.345.187-2.036 0-3.87-1.995-7.3-5-8.96C8.995 5.7 7 9.13 7 13c0 .691.063 1.372.187 2.037a2 2 0 0 1-.593 1.82l-1.1 1.039.982 1.8zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"
-          fill="currentColor"
-        ></path>
-      </svg>
-      <span>Run</span>
-    </button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js"></script>
 
-    <textarea
-      disabled
-      rows="24"
-      id="output"
-      placeholder="Output"
-      style="width: 100%;"
-    ></textarea>
+    <script>
+      VANTA.FOG({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        highlightColor: 0xffc300,
+        midtoneColor: 0xff1f00,
+        lowlightColor: 0x2d00ff,
+        baseColor: 0xffebeb,
+        blurFactor: 0.6,
+        speed: 1,
+        zoom: 1
+      })
 
-    <script src="three.r134.min.js"></script>
-    <script src="vanta.fog.min.js"></script>
-    
-
-    <script type="module">
-      import interpreter from "./interpreter.js";
-
-      document.querySelector("button").addEventListener("click", async () => {
-        const input = document.querySelector("textarea").value;
-        const output = document.querySelector("#output");
-        output.value = await interpreter(input);
+      document.getElementById("run-button").addEventListener("click", async () => {
+        const input = document.getElementById("input").value;
+        const output = document.getElementById("output");
+        try {
+          console.log("Sending code to server:", input);
+          const response = await fetch('http://localhost:5000/run_code', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code: input }),
+          });
+          const data = await response.json();
+          console.log("Received response:", data);
+          if (data.error) {
+            output.value = "Error: " + data.error;
+          } else {
+            output.value = data.result;
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+          output.value = "An error occurred while communicating with the server.";
+        }
       });
     </script>
   </body>
