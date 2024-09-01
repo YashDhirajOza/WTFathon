@@ -54,13 +54,13 @@
         background-color: rgba(255, 255, 255, 0.1);
         color: #24243e;
         border: none;
-        border-radius: 10px; /* Slightly increased border radius for a softer look */
+        border-radius: 10px;
         font-size: 20px;
-        backdrop-filter: blur(10px); /* Apply blur effect */
+        backdrop-filter: blur(10px);
       }
 
       textarea[disabled] {
-        background-color: rgba(180, 184, 167, 0.3); /* Slightly lighter background for disabled state */
+        background-color: rgba(180, 184, 167, 0.3);
         color: white;
       }
 
@@ -73,13 +73,13 @@
         font-size: 17px;
         padding: 0.8em 1.3em;
         color: #fff;
-        background: linear-gradient(to right, #ffcc00, #ff5722, #3f51b5); /* Gradient matching Vanta colors */
+        background: linear-gradient(to right, #ffcc00, #ff5722, #3f51b5);
         border: none;
         letter-spacing: 0.05em;
         border-radius: 16px;
         z-index: 1;
         margin-top: 10px;
-        transition: background 0.3s ease, transform 0.3s ease; /* Added transition for smooth effects */
+        transition: background 0.3s ease, transform 0.3s ease;
       }
 
       button svg {
@@ -93,8 +93,8 @@
       }
 
       button:hover {
-        background: linear-gradient(to right, #ffeb3b, #ff5722, #303f9f); /* Darker gradient on hover */
-        transform: translateY(-3px); /* Slight lift effect on hover */
+        background: linear-gradient(to right, #ffeb3b, #ff5722, #303f9f);
+        transform: translateY(-3px);
       }
 
       button:hover svg {
@@ -156,32 +156,125 @@
         blurFactor: 0.6,
         speed: 1,
         zoom: 1
-      })
+      });
 
-      document.getElementById("run-button").addEventListener("click", async () => {
-        const input = document.getElementById("input").value;
-        const output = document.getElementById("output");
-        try {
-          console.log("Sending code to server:", input);
-          const response = await fetch('http://localhost:5000/run_code', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ code: input }),
-          });
-          const data = await response.json();
-          console.log("Received response:", data);
-          if (data.error) {
-            output.value = "Error: " + data.error;
-          } else {
-            output.value = data.result;
-          }
-        } catch (error) {
-          console.error("An error occurred:", error);
-          output.value = "An error occurred while communicating with the server.";
+      class MasalaCodeInterpreter {
+        constructor() {
+            this.variables = {};
+            this.functions = {};
         }
+
+        run(code) {
+            const lines = code.split('\n');
+            let i = 0;
+            while (i < lines.length) {
+                let line = lines[i].trim();
+                if (line.startsWith('Khao maa kasam')) {
+                    this.declareVariable(line);
+                } else if (line.startsWith('ye lee')) {
+                    this.yeLee(line);
+                } else if (line.startsWith('chai_pe_charcha')) {
+                    i = this.executeLoop(lines, i);
+                } else if (line.startsWith('agar_toh_phir')) {
+                    i = this.executeConditional(lines, i);
+                } else if (line.startsWith('agle_janam_mohe')) {
+                    i = this.defineFunction(lines, i);
+                } else if (line.startsWith('chalta_hai')) {
+                    this.procrastinate();
+                } else {
+                    this.handleUndefinedKeyword(line);
+                }
+                i += 1;
+            }
+        }
+
+        declareVariable(line) {
+            const parts = line.split(' ');
+            if (parts.length >= 4 && parts[2] === '=') {
+                const varName = parts[1];
+                const value = eval(parts.slice(3).join(' '));
+                this.variables[varName] = value;
+                this.playSound("maa_.mp3"); // Play specific sound for this command
+            }
+        }
+
+        yeLee(line) {
+            const match = line.match(/ye lee\s*\((.*)\)/);
+            if (match) {
+                const message = eval(match[1]);
+                this.logOutput(message);
+                this.playSound("meme1.mp3"); // Play specific sound for 'ye lee' command
+            }
+        }
+
+        executeLoop(lines, index) {
+            const loopHeader = lines[index];
+            const condition = loopHeader.match(/chai_pe_charcha\s*\((.*)\)/)[1];
+            let loopBody = [];
+            index += 1;
+            while (index < lines.length && !lines[index].trim().startsWith('bus_karo')) {
+                loopBody.push(lines[index]);
+                index += 1;
+            }
+            while (eval(condition)) {
+                this.run(loopBody.join('\n'));
+            }
+            return index;
+        }
+
+        executeConditional(lines, index) {
+            const conditionLine = lines[index];
+            const condition = conditionLine.match(/agar_toh_phir\s*\((.*)\)/)[1];
+            let block = [];
+            index += 1;
+            while (index < lines.length && !lines[index].trim().startsWith('warna')) {
+                block.push(lines[index]);
+                index += 1;
+            }
+            if (eval(condition)) {
+                this.run(block.join('\n'));
+            }
+            return index;
+        }
+
+        defineFunction(lines, index) {
+            const funcHeader = lines[index];
+            const funcName = funcHeader.match(/agle_janam_mohe\s*(\w+)/)[1];
+            let funcBody = [];
+            index += 1;
+            while (index < lines.length && !lines[index].trim().startsWith('aur_phir')) {
+                funcBody.push(lines[index]);
+                index += 1;
+            }
+            this.functions[funcName] = funcBody.join('\n');
+            return index;
+        }
+
+        procrastinate() {
+            // Do nothing or implement procrastination logic
+        }
+
+        playSound(file) {
+            const audio = new Audio(file);
+            audio.play();
+        }
+
+        handleUndefinedKeyword(line) {
+            // Play the audio for undefined keywords
+            this.playSound("yea_.mp3");
+            this.logOutput(`Undefined keyword: ${line}`);
+        }
+
+        logOutput(message) {
+            document.getElementById('output').value += message + '\n';
+        }
+      }
+
+      const interpreter = new MasalaCodeInterpreter();
+      document.getElementById('run-button').addEventListener('click', () => {
+        const inputCode = document.getElementById('input').value;
+        interpreter.run(inputCode);
       });
     </script>
-  </body>
+</body>
 </html>
