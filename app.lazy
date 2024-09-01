@@ -1,0 +1,16 @@
+maybe x = 10
+maybe y = 10
+complain("Starting this pointless task...")
+eventually (x > 0):
+    complain(x)
+    maybe x = x - 1
+    procrastinate
+done
+whenever (y > 5):
+    complain("Y is too big, I'll deal with it later")
+done
+someday add_numbers(a, b):
+    maybe result = a + b
+    complain(result)
+done
+complain("Finished! That wasn't so bad, was it?")

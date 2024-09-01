@@ -51,8 +51,8 @@
         flex-grow: 1;
         padding: 8px;
         z-index: 1;
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #24243e;
+        background-color: rgba(180, 184, 167, 0.3);
+        color: white;
         border: none;
         border-radius: 10px;
         font-size: 20px;
@@ -181,6 +181,8 @@
                     i = this.defineFunction(lines, i);
                 } else if (line.startsWith('chalta_hai')) {
                     this.procrastinate();
+                } else {
+                    this.handleUndefinedKeyword(line);
                 }
                 i += 1;
             }
@@ -192,7 +194,7 @@
                 const varName = parts[1];
                 const value = eval(parts.slice(3).join(' '));
                 this.variables[varName] = value;
-                this.playSound("maa_.mp3"); // Ensure this is a relative path or correct URL
+                this.playSound("maa_.mp3"); // Play specific sound for this command
             }
         }
 
@@ -201,7 +203,7 @@
             if (match) {
                 const message = eval(match[1]);
                 this.logOutput(message);
-                this.playSound("meme1.mp3"); // Ensure this is a relative path or correct URL
+                this.playSound("meme1.mp3"); // Play specific sound for 'ye lee' command
             }
         }
 
@@ -255,6 +257,12 @@
         playSound(file) {
             const audio = new Audio(file);
             audio.play();
+        }
+
+        handleUndefinedKeyword(line) {
+            // Play the audio for undefined keywords
+            this.playSound("yea_.mp3");
+            this.logOutput(`Undefined keyword: ${line}`);
         }
 
         logOutput(message) {
