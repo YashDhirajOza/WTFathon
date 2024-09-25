@@ -157,18 +157,16 @@
         speed: 1,
         zoom: 1
       });
+class MasalaCodeInterpreter {
+        constructor() {
+            this.variables = {};
+            this.functions = {};
+        }
 
-     class MasalaCodeInterpreter {
-    constructor() {
-        this.variables = {};
-        this.functions = {};
-    }
-
-    run(code) {
-        const lines = this.preprocessCode(code);
-        let i = 0;
-        while (i < lines.length) {
-            try {
+        run(code) {
+            const lines = code.split('\n');
+            let i = 0;
+            while (i < lines.length) {
                 let line = lines[i].trim();
                 if (line.startsWith('Khao maa kasam')) {
                     this.declareVariable(line);
@@ -182,152 +180,100 @@
                     i = this.defineFunction(lines, i);
                 } else if (line.startsWith('chalta_hai')) {
                     this.procrastinate();
-                } else if (line.trim() !== '') {
+                } else {
                     this.handleUndefinedKeyword(line);
                 }
-            } catch (error) {
-                this.logOutput(`Error on line ${i + 1}: ${error.message}`);
-            }
-            i += 1;
-        }
-    }
-
-    preprocessCode(code) {
-        const lines = code.split('\n');
-        const processedLines = [];
-        let currentLine = '';
-
-        for (let line of lines) {
-            currentLine += line.trim();
-            if (currentLine.endsWith('\\')) {
-                currentLine = currentLine.slice(0, -1);
-            } else {
-                processedLines.push(currentLine);
-                currentLine = '';
+                i += 1;
             }
         }
 
-        if (currentLine) {
-            processedLines.push(currentLine);
-        }
-
-        return processedLines;
-    }
-
-    declareVariable(line) {
-        const match = line.match(/Khao maa kasam\s+(\w+)\s*=\s*(.*)/);
-        if (match) {
-            const [, varName, valueExpr] = match;
-            const value = this.evaluateExpression(valueExpr);
-            this.variables[varName] = value;
-            this.playSound("maa_.mp3");
-            this.logOutput(`Variable ${varName} declared with value ${value}`);
-        } else {
-            throw new Error("Invalid variable declaration");
-        }
-    }
-
-    yeLee(line) {
-        const match = line.match(/ye lee\s*\((.*)\)/);
-        if (match) {
-            const message = this.evaluateExpression(match[1]);
-            this.logOutput(message);
-            this.playSound("meme1.mp3");
-        } else {
-            throw new Error("Invalid ye lee statement");
-        }
-    }
-
-    executeLoop(lines, index) {
-        const loopHeader = lines[index];
-        const condition = loopHeader.match(/chai_pe_charcha\s*\((.*)\)/)[1];
-        let loopBody = [];
-        index += 1;
-        let nestedLevel = 0;
-        while (index < lines.length) {
-            if (lines[index].trim().startsWith('chai_pe_charcha')) nestedLevel++;
-            if (lines[index].trim() === 'bus_karo') {
-                if (nestedLevel === 0) break;
-                nestedLevel--;
+        declareVariable(line) {
+            const parts = line.split(' ');
+            if (parts.length >= 4 && parts[2] === '=') {
+                const varName = parts[1];
+                const value = eval(parts.slice(3).join(' '));
+                this.variables[varName] = value;
+                this.playSound("maa_.mp3"); // Play specific sound for this command
             }
-            loopBody.push(lines[index]);
+        }
+
+        yeLee(line) {
+            const match = line.match(/ye lee\s*\((.*)\)/);
+            if (match) {
+                const message = eval(match[1]);
+                this.logOutput(message);
+                this.playSound("meme1.mp3"); // Play specific sound for 'ye lee' command
+            }
+        }
+
+        executeLoop(lines, index) {
+            const loopHeader = lines[index];
+            const condition = loopHeader.match(/chai_pe_charcha\s*\((.*)\)/)[1];
+            let loopBody = [];
             index += 1;
-        }
-        while (this.evaluateExpression(condition)) {
-            this.run(loopBody.join('\n'));
-        }
-        return index;
-    }
-
-    executeConditional(lines, index) {
-        const conditionLine = lines[index];
-        const condition = conditionLine.match(/agar_toh_phir\s*\((.*)\)/)[1];
-        let block = [];
-        index += 1;
-        let nestedLevel = 0;
-        while (index < lines.length) {
-            if (lines[index].trim().startsWith('agar_toh_phir')) nestedLevel++;
-            if (lines[index].trim() === 'warna') {
-                if (nestedLevel === 0) break;
-                nestedLevel--;
+            while (index < lines.length && !lines[index].trim().startsWith('bus_karo')) {
+                loopBody.push(lines[index]);
+                index += 1;
             }
-            block.push(lines[index]);
+            while (eval(condition)) {
+                this.run(loopBody.join('\n'));
+            }
+            return index;
+        }
+
+        executeConditional(lines, index) {
+            const conditionLine = lines[index];
+            const condition = conditionLine.match(/agar_toh_phir\s*\((.*)\)/)[1];
+            let block = [];
             index += 1;
+            while (index < lines.length && !lines[index].trim().startsWith('warna')) {
+                block.push(lines[index]);
+                index += 1;
+            }
+            if (eval(condition)) {
+                this.run(block.join('\n'));
+            }
+            return index;
         }
-        if (this.evaluateExpression(condition)) {
-            this.run(block.join('\n'));
-        }
-        return index;
-    }
 
-    defineFunction(lines, index) {
-        const funcHeader = lines[index];
-        const funcName = funcHeader.match(/agle_janam_mohe\s*(\w+)/)[1];
-        let funcBody = [];
-        index += 1;
-        while (index < lines.length && !lines[index].trim().startsWith('aur_phir')) {
-            funcBody.push(lines[index]);
+        defineFunction(lines, index) {
+            const funcHeader = lines[index];
+            const funcName = funcHeader.match(/agle_janam_mohe\s*(\w+)/)[1];
+            let funcBody = [];
             index += 1;
+            while (index < lines.length && !lines[index].trim().startsWith('aur_phir')) {
+                funcBody.push(lines[index]);
+                index += 1;
+            }
+            this.functions[funcName] = funcBody.join('\n');
+            return index;
         }
-        this.functions[funcName] = funcBody.join('\n');
-        this.logOutput(`Function ${funcName} defined`);
-        return index;
-    }
 
-    procrastinate() {
-        this.logOutput("Procrastinating... Maybe I'll do it later.");
-    }
-
-    playSound(file) {
-        // In a real implementation, you'd play the sound here
-        this.logOutput(`Playing sound: ${file}`);
-    }
-
-    handleUndefinedKeyword(line) {
-        this.playSound("yea_.mp3");
-        this.logOutput(`Undefined keyword: ${line}`);
-    }
-
-    logOutput(message) {
-        console.log(message);  // For debugging
-        const outputElement = document.getElementById('output');
-        if (outputElement) {
-            outputElement.value += message + '\n';
+        procrastinate() {
+            // Do nothing or implement procrastination logic
         }
-    }
 
-    evaluateExpression(expr) {
-        // This is a simple evaluation. In a real implementation, you'd want to use a proper parser
-        // and evaluator to handle variables, functions, and to ensure security.
-        return eval(expr);
-    }
-}
+        playSound(file) {
+            const audio = new Audio(file);
+            audio.play();
+        }
 
-const interpreter = new MasalaCodeInterpreter();
-document.getElementById('run-button').addEventListener('click', () => {
-    const inputCode = document.getElementById('input').value;
-    interpreter.run(inputCode);
-});
+        handleUndefinedKeyword(line) {
+            // Play the audio for undefined keywords
+            this.playSound("yea_.mp3");
+            this.logOutput(`Undefined keyword: ${line}`);
+        }
+
+        logOutput(message) {
+            document.getElementById('output').value += message + '\n';
+        }
+      }
+
+      const interpreter = new MasalaCodeInterpreter();
+      document.getElementById('run-button').addEventListener('click', () => {
+        const inputCode = document.getElementById('input').value;
+        interpreter.run(inputCode);
+      });
     </script>
 </body>
 </html>
